@@ -1,16 +1,20 @@
 package com.mohan.gaffaney.bisondining.activity;
 
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceFragment;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -23,15 +27,15 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.mohan.gaffaney.bisondining.R;
-import com.mohan.gaffaney.bisondining.fragment.Settings;
+import com.mohan.gaffaney.bisondining.fragment.SettingsFragment;
 
 import java.util.ArrayList;
-import android.os.Handler;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
     ViewPager mViewPager;
     PagerAdapter adapter;
+    FragmentManager fragmentManager;
+
     static ArrayList<String> Favorites = new ArrayList<>();
     private CharSequence mTitle;
     private CharSequence mDrawerTitle;
@@ -49,9 +53,6 @@ public class MainActivity extends AppCompatActivity {
     public static  String[] UNION = {
             "a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
 
-    private Handler mHandler;
-
-
     private Toolbar toolbar;
 
     @Override
@@ -59,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         //Assign default View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        fragmentManager = getSupportFragmentManager();
 
         //Get views and layouts
         activityTitles = getResources().getStringArray(R.array.nav_item_titles);
@@ -79,7 +82,6 @@ public class MainActivity extends AppCompatActivity {
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         adapter = new PagerAdapter(getSupportFragmentManager());
-        mHandler = new Handler();
 
 
 
@@ -115,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class PagerAdapter extends FragmentPagerAdapter {
+    private class PagerAdapter extends FragmentStatePagerAdapter {
 
         public PagerAdapter(FragmentManager fm) {
             super(fm);
@@ -175,19 +177,6 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.list_fragment_object, container, false);
-//            TextView txt = (TextView) v.findViewById(R.id.page_title);
-//            int page = getArguments().getInt("num", -1);
-//            String title;
-//            switch (page){
-//                case 0: title = "Residence Dining Hall";
-//                    break;
-//                case 1: title = "West Dining Hall";
-//                    break;
-//                case 2: title = "Union Dining Hall";
-//                    break;
-//                default: title = "Page";
-//            }
-//            txt.setText(title);
             return v;
         }
 
@@ -251,13 +240,20 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectItem(int position){
-        Fragment fragment = new Settings();
-        FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.pager, fragment).commit();
-
+        PreferenceFragmentCompat fragment;
+        switch(position){
+            case 0:
+                break;
+            case 1:
+                fragment = new SettingsFragment();
+                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("settings").commit();
+                break;
+            default:
+                break;
+        }
         mDrawerList.setItemChecked(position, true);
-        setTitle(activityTitles[position]);
         mDrawerLayout.closeDrawer(mDrawerList);
+
 
     }
 

@@ -3,72 +3,43 @@ package com.mohan.gaffaney.bisondining.activity;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
-import android.preference.PreferenceFragment;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentStatePagerAdapter;
-import android.support.v4.app.ListFragment;
-import android.support.v4.view.ViewPager;
+
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
-
 import com.mohan.gaffaney.bisondining.R;
 import com.mohan.gaffaney.bisondining.fragment.SettingsFragment;
+import com.mohan.gaffaney.bisondining.fragment.TabFragment;
 
 import java.util.ArrayList;
 
-public class MainActivity extends AppCompatActivity {
-    ViewPager mViewPager;
-    PagerAdapter adapter;
-    FragmentManager fragmentManager;
-
-    static ArrayList<String> Favorites = new ArrayList<>();
+public class MainActivity extends AppCompatActivity implements TabFragment.OnFragmentInteractionListener{
+    public static ArrayList<String> Favorites = new ArrayList<>();
     private CharSequence mTitle;
     private CharSequence mDrawerTitle;
     private String[] activityTitles;
-    private final String[] diningHalls  = {"Residence", "West", "Union"};
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
-    public static final String[] FOODS = {
-            "Burger", "Potatoes", "Grilled Cheese", "Salad", "Memes", "Pencils", "Yogurt", "A", "B", "C", "D", "E", "F"};
-    public static  String[] RESIDENCE = {
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
-    public static  String[] WEST = {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-    public static  String[] UNION = {
-            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
-
     private Toolbar toolbar;
+    private TabFragment tabFrag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         //Assign default View
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        fragmentManager = getSupportFragmentManager();
-
         //Get views and layouts
         activityTitles = getResources().getStringArray(R.array.nav_item_titles);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.left_drawer);
-        mViewPager = (ViewPager)findViewById(R.id.pager);
-        TabLayout tabs = (TabLayout) findViewById(R.id.tabs);
 
 
         //Assign title
@@ -81,9 +52,8 @@ public class MainActivity extends AppCompatActivity {
         mDrawerList.setOnItemClickListener(new DrawerItemClickListener());
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        adapter = new PagerAdapter(getSupportFragmentManager());
 
-
+        tabFrag = new TabFragment();
 
         mDrawerToggle = new ActionBarDrawerToggle(
                 this,
@@ -104,9 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
-
-        mViewPager.setAdapter(adapter);
-        tabs.setupWithViewPager(mViewPager);
+        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, tabFrag).commit();
 
 
     }
@@ -117,100 +85,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private class PagerAdapter extends FragmentStatePagerAdapter {
-
-        public PagerAdapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        @Override
-        public Fragment getItem(int i) {
-            return ArrayListFragment.newInstance(i);
-        }
-
-        @Override
-        public int getCount() {
-            return 3;
-        }
-
-        public CharSequence getPageTitle(int position){
-            CharSequence txt;
-            switch (position){
-                case 0:
-                    txt = diningHalls[0];
-                    break;
-                case 1:
-                    txt = diningHalls[1];
-                    break;
-                case 2:
-                    txt = diningHalls[2];
-                    break;
-                default:
-                    txt = "";
-                    break;
-            }
-            return txt;
-        }
-    }
 
 
 
-    public static class ArrayListFragment extends ListFragment {
-        int Num;
-
-        static ArrayListFragment newInstance(int num){
-            ArrayListFragment f = new ArrayListFragment();
-
-            Bundle args = new Bundle();
-            args.putInt("num", num);
-            f.setArguments(args);
-            return f;
-        }
-
-        @Override
-        public void onCreate(Bundle savedInstanceState){
-            super.onCreate(savedInstanceState);
-            Num = getArguments() != null ? getArguments().getInt("num") : 1;
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                                 Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.list_fragment_object, container, false);
-            return v;
-        }
-
-        @Override
-        public void onActivityCreated(Bundle savedInstanceState) {
-            super.onActivityCreated(savedInstanceState);
-
-            switch (Num){
-                case 0:
-                    setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            android.R.layout.simple_list_item_1, RESIDENCE));
-                    break;
-                case 1:
-                    setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            android.R.layout.simple_list_item_1, WEST));
-                    break;
-                case 2:
-                    setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            android.R.layout.simple_list_item_1, UNION));
-                    break;
-                default:
-
-                    break;
-            }
-
-        }
-
-        @Override
-        public void onListItemClick(ListView l, View v, int position, long id) {
-            Log.i("FragmentList", "Item clicked: " + FOODS[position]);
-            Favorites.add(FOODS[position]);
-        }
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -232,6 +109,11 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onFragmentInteraction(Uri uri) {
+
+    }
+
     private class DrawerItemClickListener implements ListView.OnItemClickListener {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -240,13 +122,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void selectItem(int position){
-        PreferenceFragmentCompat fragment;
         switch(position){
             case 0:
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, tabFrag).commit();
                 break;
             case 1:
-                fragment = new SettingsFragment();
-                getSupportFragmentManager().beginTransaction().replace(R.id.content_frame, fragment).addToBackStack("settings").commit();
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new SettingsFragment()).addToBackStack("settings").commit();
                 break;
             default:
                 break;

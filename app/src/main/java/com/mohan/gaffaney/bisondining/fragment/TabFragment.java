@@ -17,18 +17,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
 import com.mohan.gaffaney.bisondining.R;
-import com.mohan.gaffaney.bisondining.activity.MainActivity;
 
 import static com.mohan.gaffaney.bisondining.activity.MainActivity.Favorites;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link TabFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link TabFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+
 public class TabFragment extends Fragment {
     PagerAdapter adapter;
     ViewPager mViewPager;
@@ -52,18 +44,9 @@ public class TabFragment extends Fragment {
     }
 
 
-    public static TabFragment newInstance(String param1, String param2) {
-        TabFragment fragment = new TabFragment();
-        Bundle args = new Bundle();
-
-        fragment.setArguments(args);
-        return fragment;
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-
-
         super.onCreate(savedInstanceState);
     }
 
@@ -74,7 +57,7 @@ public class TabFragment extends Fragment {
         // Inflate the layout for this fragment
         mViewPager = (ViewPager) view.findViewById(R.id.pager);
         tabs = (TabLayout) view.findViewById(R.id.tabs);
-        adapter = new PagerAdapter(getActivity().getSupportFragmentManager());
+        adapter = new PagerAdapter(getChildFragmentManager());
         mViewPager.setAdapter(adapter);
         tabs.setupWithViewPager(mViewPager);
 
@@ -109,7 +92,7 @@ public class TabFragment extends Fragment {
 
         @Override
         public Fragment getItem(int i) {
-            return ArrayListFragment.newInstance(i);
+            return MenuListFragment.newInstance(i);
         }
 
         @Override
@@ -136,11 +119,11 @@ public class TabFragment extends Fragment {
             return txt;
         }
     }
-    public static class ArrayListFragment extends ListFragment {
+    public static class MenuListFragment extends ListFragment {
         int Num;
 
-        static ArrayListFragment newInstance(int num){
-            ArrayListFragment f = new ArrayListFragment();
+        static MenuListFragment newInstance(int num){
+            MenuListFragment f = new MenuListFragment();
 
             Bundle args = new Bundle();
             args.putInt("num", num);
@@ -157,7 +140,7 @@ public class TabFragment extends Fragment {
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
-            View v = inflater.inflate(R.layout.list_fragment_object, container, false);
+            View v = inflater.inflate(R.layout.list_fragment, container, false);
             return v;
         }
 
@@ -168,15 +151,15 @@ public class TabFragment extends Fragment {
             switch (Num){
                 case 0:
                     setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            android.R.layout.simple_list_item_1, RESIDENCE));
+                            R.layout.favorite_item, R.id.favorite_text, RESIDENCE));
                     break;
                 case 1:
                     setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            android.R.layout.simple_list_item_1, WEST));
+                            R.layout.favorite_item, R.id.favorite_text, WEST));
                     break;
                 case 2:
                     setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            android.R.layout.simple_list_item_1, UNION));
+                            R.layout.favorite_item, R.id.favorite_text, UNION));
                     break;
                 default:
 

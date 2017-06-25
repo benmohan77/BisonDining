@@ -1,6 +1,7 @@
 package com.mohan.gaffaney.bisondining.fragment;
 
 import android.content.Context;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
@@ -14,9 +15,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.mohan.gaffaney.bisondining.R;
+import com.mohan.gaffaney.bisondining.objects.foodItem;
+
+import java.util.ArrayList;
 
 import static com.mohan.gaffaney.bisondining.activity.MainActivity.Favorites;
 
@@ -27,13 +35,11 @@ public class TabFragment extends Fragment {
     TabLayout tabs;
 
     public static final String[] FOODS = {
-            "Burger", "Potatoes", "Grilled Cheese", "Salad", "Memes", "Pencils", "Yogurt", "A", "B", "C", "D", "E", "F"};
-    public static  String[] RESIDENCE = {
-            "A", "B", "C", "D", "E", "F", "G", "H", "I", "J"};
-    public static  String[] WEST = {
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
-    public static  String[] UNION = {
-            "a", "b", "c", "d", "e", "f", "g", "h", "i", "j"};
+            "Burger", "Potatoes", "Grilled Cheese", "Salad", "Memes", "Pencils", "Yogurt", "Lasagna", "Fries", "Apples", "Oreo Cookie Salad", "Chicken Strips", "Tacos"};
+
+    public static ArrayList<foodItem> Residence = new ArrayList<>();
+    public static ArrayList<foodItem> West = new ArrayList<>();
+    public static ArrayList<foodItem> Union = new ArrayList<>();
     private final String[] diningHalls  = {"Residence", "West", "Union"};
 
 
@@ -60,6 +66,14 @@ public class TabFragment extends Fragment {
         adapter = new PagerAdapter(getChildFragmentManager());
         mViewPager.setAdapter(adapter);
         tabs.setupWithViewPager(mViewPager);
+
+        for(int i = 0; i < FOODS.length; i++){
+            Residence.add(new foodItem(FOODS[i], true));
+            West.add(new foodItem(FOODS[i], true));
+            Union.add(new foodItem(FOODS[i], true));
+
+        }
+
 
         return view;
     }
@@ -119,6 +133,30 @@ public class TabFragment extends Fragment {
             return txt;
         }
     }
+
+    public static class FoodAdapter extends ArrayAdapter<foodItem>{
+        public FoodAdapter(Context context, ArrayList<foodItem> food){
+            super(context, 0, food);
+        }
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent){
+            foodItem foodItem = getItem(position);
+
+            if(convertView ==null){
+                convertView = LayoutInflater.from(getContext()).inflate(R.layout.favorite_item, parent, false);
+            }
+
+            TextView name = (TextView) convertView.findViewById(R.id.favorite_text);
+            CheckBox fav = (CheckBox) convertView.findViewById(R.id.favorite_img);
+
+            name.setText(foodItem.itemName);
+            fav.setChecked(foodItem.isFavorite);
+            return convertView;
+        }
+    }
+
+
+
     public static class MenuListFragment extends ListFragment {
         int Num;
 
@@ -141,6 +179,7 @@ public class TabFragment extends Fragment {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View v = inflater.inflate(R.layout.list_fragment, container, false);
+            View view = inflater.inflate(R.layout.favorite_item, container, false);
             return v;
         }
 
@@ -150,16 +189,13 @@ public class TabFragment extends Fragment {
 
             switch (Num){
                 case 0:
-                    setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            R.layout.favorite_item, R.id.favorite_text, RESIDENCE));
+                    setListAdapter(new FoodAdapter(getActivity(), Residence));
                     break;
                 case 1:
-                    setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            R.layout.favorite_item, R.id.favorite_text, WEST));
+                    setListAdapter(new FoodAdapter(getActivity(), West));
                     break;
                 case 2:
-                    setListAdapter(new ArrayAdapter<String>(getActivity(),
-                            R.layout.favorite_item, R.id.favorite_text, UNION));
+                    setListAdapter(new FoodAdapter(getActivity(), Union));
                     break;
                 default:
 
@@ -172,6 +208,7 @@ public class TabFragment extends Fragment {
         public void onListItemClick(ListView l, View v, int position, long id) {
             Log.i("FragmentList", "Item clicked: " + FOODS[position]);
             Favorites.add(FOODS[position]);
+            Residence.get(position).toggleFavorite();
         }
 
     }

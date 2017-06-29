@@ -182,9 +182,11 @@ public class TabFragment extends Fragment {
 
     public static class FoodAdapter extends ArrayAdapter<foodItem>{
         private ArrayList<foodItem> foods;
-        public FoodAdapter(Context context, ArrayList<foodItem> food){
+        private String key;
+        public FoodAdapter(Context context, ArrayList<foodItem> food, String prefKey){
             super(context, 0, food);
             foods = food;
+            key = prefKey;
         }
         @Override
         public View getView(final int position, View convertView, ViewGroup parent){
@@ -202,11 +204,11 @@ public class TabFragment extends Fragment {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     foods.get(position).toggleFavorite();
-                    editor.putStringSet("Residence", setArrayListToSet(foods));
+                    editor.putStringSet(key, setArrayListToSet(foods));
                     editor.commit();
                 }
             });
-            for(foodItem a : getArrayListFromPrefs("Residence")){
+            for(foodItem a : getArrayListFromPrefs(key)){
                 System.out.println(a.toString());
             }
 
@@ -253,13 +255,13 @@ public class TabFragment extends Fragment {
 
             switch (Num){
                 case 0:
-                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("Residence")));
+                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("Residence"), "Residence"));
                     break;
                 case 1:
-                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("West")));
+                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("West"), "West"));
                     break;
                 case 2:
-                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("Union")));
+                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("Union"), "Union"));
                     break;
                 default:
 

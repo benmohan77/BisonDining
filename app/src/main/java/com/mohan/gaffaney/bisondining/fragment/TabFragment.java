@@ -1,6 +1,7 @@
 package com.mohan.gaffaney.bisondining.fragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,22 +10,29 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.app.ListFragment;
+import android.support.v4.content.SharedPreferencesCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.mohan.gaffaney.bisondining.R;
 import com.mohan.gaffaney.bisondining.objects.foodItem;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.mohan.gaffaney.bisondining.activity.MainActivity.Favorites;
 
@@ -42,7 +50,8 @@ public class TabFragment extends Fragment {
     public static ArrayList<foodItem> Union = new ArrayList<>();
     private final String[] diningHalls  = {"Residence", "West", "Union"};
 
-
+    private static SharedPreferences.Editor editor;
+    private static SharedPreferences prefs;
     private OnFragmentInteractionListener mListener;
 
     public TabFragment() {
@@ -74,8 +83,45 @@ public class TabFragment extends Fragment {
 
         }
 
+        prefs = PreferenceManager.getDefaultSharedPreferences(this.getContext());
+        editor = prefs.edit();
+
+
+        if(prefs.getStringSet("Residence", null) == null){
+            editor.putStringSet("Residence", setArrayListToSet(Residence));
+            editor.commit();
+        }
+        if(prefs.getStringSet("West", null) == null){
+            editor.putStringSet("West", setArrayListToSet(West));
+            editor.commit();
+        }
+        if(prefs.getStringSet("Union", null) == null){
+            editor.putStringSet("Union", setArrayListToSet(Union));
+            editor.commit();
+        }
+
+
 
         return view;
+    }
+
+    public static Set<String> setArrayListToSet(ArrayList<foodItem> foods){
+        Set<String> storedFood = new HashSet<>();
+        Gson gson = new Gson();
+        for(foodItem a: foods){
+            storedFood.add(gson.toJson(a));
+        }
+        return storedFood;
+    }
+
+    public static ArrayList<foodItem> getArrayListFromPrefs(String key){
+        Set<String> set = prefs.getStringSet(key, null);
+        Gson gson = new Gson();
+        ArrayList<foodItem> foods = new ArrayList<>();
+        for (String a : set) {
+            foods.add(gson.fromJson(a, foodItem.class));
+        }
+        return foods;
     }
 
     @Override
@@ -135,12 +181,14 @@ public class TabFragment extends Fragment {
     }
 
     public static class FoodAdapter extends ArrayAdapter<foodItem>{
+        private ArrayList<foodItem> foods;
         public FoodAdapter(Context context, ArrayList<foodItem> food){
             super(context, 0, food);
+            foods = food;
         }
         @Override
-        public View getView(int position, View convertView, ViewGroup parent){
-            foodItem foodItem = getItem(position);
+        public View getView(final int position, View convertView, ViewGroup parent){
+            final foodItem foodItem = getItem(position);
 
             if(convertView ==null){
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.favorite_item, parent, false);
@@ -148,9 +196,21 @@ public class TabFragment extends Fragment {
 
             TextView name = (TextView) convertView.findViewById(R.id.favorite_text);
             CheckBox fav = (CheckBox) convertView.findViewById(R.id.favorite_img);
-
             name.setText(foodItem.itemName);
             fav.setChecked(foodItem.isFavorite);
+            fav.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    foods.get(position).toggleFavorite();
+                    editor.putStringSet("Residence", setArrayListToSet(foods));
+                    editor.commit();
+                }
+            });
+            for(foodItem a : getArrayListFromPrefs("Residence")){
+                System.out.println(a.toString());
+            }
+
+
             return convertView;
         }
     }
@@ -183,19 +243,23 @@ public class TabFragment extends Fragment {
             return v;
         }
 
+        public int getNum(){
+            return Num;
+        }
+
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
 
             switch (Num){
                 case 0:
-                    setListAdapter(new FoodAdapter(getActivity(), Residence));
+                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("Residence")));
                     break;
                 case 1:
-                    setListAdapter(new FoodAdapter(getActivity(), West));
+                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("West")));
                     break;
                 case 2:
-                    setListAdapter(new FoodAdapter(getActivity(), Union));
+                    setListAdapter(new FoodAdapter(getActivity(), getArrayListFromPrefs("Union")));
                     break;
                 default:
 
@@ -208,7 +272,7 @@ public class TabFragment extends Fragment {
         public void onListItemClick(ListView l, View v, int position, long id) {
             Log.i("FragmentList", "Item clicked: " + FOODS[position]);
             Favorites.add(FOODS[position]);
-            Residence.get(position).toggleFavorite();
+
         }
 
     }

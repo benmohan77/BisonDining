@@ -13,6 +13,11 @@ public class foodItem {
         this.isFavorite = favorite;
     }
 
+    @Override
+    public String toString(){
+        return this.itemName + ", " + this.isFavorite;
+    }
+
     public void toggleFavorite(){
         if(isFavorite){
             isFavorite = false;
